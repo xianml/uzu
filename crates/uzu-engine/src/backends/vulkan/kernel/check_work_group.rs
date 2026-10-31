@@ -1,5 +1,3 @@
-include!(concat!(env!("OUT_DIR"), "/vulkan.rs"));
-
 use crate::backends::vulkan::{VkKernelError, VkPhysicalDevice};
 
 /// Fails unless a workgroup of `size` is within the device's limits and, with a required subgroup size, made of whole

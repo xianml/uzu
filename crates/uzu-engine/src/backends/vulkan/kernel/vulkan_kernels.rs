@@ -13,6 +13,8 @@ use crate::{
     data_type::DataType,
 };
 
+include!(concat!(env!("OUT_DIR"), "/vulkan.rs"));
+
 pub struct VulkanKernels;
 
 impl Kernels for VulkanKernels {
