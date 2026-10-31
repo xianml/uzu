@@ -1358,6 +1358,7 @@ dependencies = [
  "tokio",
  "toml 1.1.8+spec-1.1.0",
  "toml_edit 0.25.17+spec-1.1.0",
+ "uniffi",
  "walkdir",
 ]
 
@@ -10015,6 +10016,7 @@ dependencies = [
  "indexmap 2.14.2",
  "indicatif",
  "inventory",
+ "jni 0.22.4",
  "kiban",
  "mock-registry",
  "nagare",
@@ -10032,6 +10034,7 @@ dependencies = [
  "reqwest 0.13.5",
  "rodio",
  "rstest",
+ "rustls-platform-verifier",
  "schemars 1.2.3",
  "serde",
  "serde-wasm-bindgen",
