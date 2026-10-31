@@ -1,4 +1,4 @@
-import { isMacPlatform } from "@/utils/platform";
+import { isMacPlatform, isWindowsPlatform } from "@/utils/platform";
 
 export const platformInfo = {
   isWeb: __PLATFORM__ === "web",
@@ -13,5 +13,8 @@ export const platformInfo = {
     // Overlay title bar with in-content macOS traffic lights: UI must reserve
     // space on the top-left so controls don't sit under the traffic lights.
     nativeTitleBar: __PLATFORM__ === "tauri" && isMacPlatform(),
+    // Frameless Windows window: the app draws the caption buttons on the
+    // top-right, so UI must keep that corner free.
+    windowControls: __PLATFORM__ === "tauri" && isWindowsPlatform(),
   },
 } as const;

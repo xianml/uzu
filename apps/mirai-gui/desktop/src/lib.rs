@@ -77,6 +77,9 @@ pub fn run() {
                 .title_bar_style(tauri::TitleBarStyle::Overlay)
                 .hidden_title(true)
                 .traffic_light_position(tauri::LogicalPosition::new(20.0, 28.0));
+            // Like the macOS overlay title bar: the client draws the caption buttons and drag regions.
+            #[cfg(windows)]
+            let window = window.decorations(false);
             let window = window
                 // In-window navigation to an external URL would replace the app;
                 // hand it to the default browser instead.

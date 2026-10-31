@@ -1,6 +1,7 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "../shared/invoke";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { navigationRequestTypes, type NavigationRequest } from "../../types/navigation";
 import { isMacPlatform } from "@/utils/platform";
 import type { SystemService } from ".";
@@ -69,4 +70,25 @@ export const tauriSystem: SystemService = {
   installCli: () => invoke<"installed" | "already-installed" | "cancelled">("cli_install"),
   getCliStatus: () =>
     invoke<"missing" | "installed" | "foreign" | "unavailable">("cli_status").catch(() => "unavailable" as const),
+  minimizeWindow: () => getCurrentWindow().minimize(),
+  toggleMaximizeWindow: () => getCurrentWindow().toggleMaximize(),
+  closeWindow: () => getCurrentWindow().close(),
+  onWindowMaximizedChange: (cb) => {
+    const window = getCurrentWindow();
+    let disposed = false;
+    const report = (): void => {
+      void window
+        .isMaximized()
+        .then((maximized) => {
+          if (!disposed) cb(maximized);
+        })
+        .catch(() => undefined);
+    };
+    report();
+    const unlisten = window.onResized(report);
+    return () => {
+      disposed = true;
+      void unlisten.then((off) => off()).catch(() => undefined);
+    };
+  },
 };
