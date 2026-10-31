@@ -112,6 +112,7 @@ pub fn run() {
             if let Err(error) = system_ui::remove_legacy_autostart() {
                 logger::warn("autostart:cleanup", Some(serde_json::json!({ "error": error.to_string() })));
             }
+            #[cfg(target_os = "macos")]
             if let Err(error) = system_ui::setup_app_menu(app.handle()) {
                 logger::error("menu:setup", Some(serde_json::json!({ "error": error.to_string() })));
             }

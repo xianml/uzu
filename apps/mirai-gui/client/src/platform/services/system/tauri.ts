@@ -2,6 +2,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "../shared/invoke";
 import { listen } from "@tauri-apps/api/event";
 import { navigationRequestTypes, type NavigationRequest } from "../../types/navigation";
+import { isMacPlatform } from "@/utils/platform";
 import type { SystemService } from ".";
 
 // WKWebView has no window-open handler wired up, so target="_blank" anchors
@@ -45,6 +46,19 @@ export const tauriSystem: SystemService = {
         cb({ type: navigationRequestTypes.openPreferences } satisfies NavigationRequest);
       }),
     );
+    // The macOS app menu owns these shortcuts; Windows and Linux have no menu bar.
+    if (!isMacPlatform()) {
+      const onKeyDown = (event: KeyboardEvent): void => {
+        if (!event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
+        const key = event.key.toLowerCase();
+        if (key === "n") cb({ type: navigationRequestTypes.newChat } satisfies NavigationRequest);
+        else if (key === ",") cb({ type: navigationRequestTypes.openPreferences } satisfies NavigationRequest);
+        else return;
+        event.preventDefault();
+      };
+      window.addEventListener("keydown", onKeyDown);
+      offs.push(() => window.removeEventListener("keydown", onKeyDown));
+    }
     return () => {
       disposed = true;
       offs.forEach((off) => off());

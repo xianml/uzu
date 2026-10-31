@@ -1,9 +1,13 @@
+use tauri::{AppHandle, Manager};
+#[cfg(target_os = "macos")]
 use tauri::{
-    AppHandle, Emitter, Manager,
+    Emitter,
     menu::{AboutMetadata, HELP_SUBMENU_ID, MenuBuilder, MenuItem, SubmenuBuilder, WINDOW_SUBMENU_ID},
 };
 
+#[cfg(target_os = "macos")]
 const MENU_NEW_CHAT_ID: &str = "menu:new-chat";
+#[cfg(target_os = "macos")]
 const MENU_SETTINGS_ID: &str = "menu:settings";
 
 // Before the startup setting was removed, tauri-plugin-autostart used the
@@ -50,6 +54,7 @@ fn remove_legacy_autostart_at(
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
 pub(crate) fn show_and_focus_main(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
@@ -58,6 +63,8 @@ pub(crate) fn show_and_focus_main(app: &AppHandle) {
     }
 }
 
+// Windows and Linux chat apps have no menu bar; the client handles Ctrl+N and Ctrl+, there.
+#[cfg(target_os = "macos")]
 pub fn setup_app_menu(app: &AppHandle) -> tauri::Result<()> {
     let package = app.package_info();
     let bundle = &app.config().bundle;
