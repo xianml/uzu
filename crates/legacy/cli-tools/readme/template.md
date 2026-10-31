@@ -67,6 +67,7 @@ You can run any example via `cargo tools example` \<{% for language in languages
 Supported backends:
 
 - `metal`
+- `vulkan`
 - `cpu`
 
 <br>
@@ -98,6 +99,8 @@ You can run `uzu` in CLI mode:
 ```bash
 cargo run --release -p cli
 ```
+
+On Linux and Windows this runs on the CPU; add `--features vulkan` to run on the GPU.
 
 This launches an interactive app where you can browse, download, and interact with models.
 

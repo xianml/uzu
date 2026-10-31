@@ -94,21 +94,22 @@ pub fn traitgen_all(
 ) -> anyhow::Result<()> {
     let out_dir = PathBuf::from(env::var("OUT_DIR").context("missing OUT_DIR")?);
 
-    let mut kernels: HashMap<KernelPath, Box<[Kernel]>> = HashMap::new();
+    let mut kernels: HashMap<KernelPath, Vec<Kernel>> = HashMap::new();
 
     let mut mismatches = Vec::new();
 
     for backend_kernels in backends_kernels {
         for (file_path, file_kernels) in backend_kernels {
-            if let Some(cached_kernels) = kernels.get(&file_path) {
-                if cached_kernels != &file_kernels {
-                    mismatches.push(format!(
-                        "kernel metadata mismatch at {}:\nfirst:  {cached_kernels:?}\nsecond: {file_kernels:?}",
-                        file_path.join("::")
-                    ));
+            // A backend may provide a subset of a file's kernels; kernels of the same name must match.
+            let path = file_path.join("::");
+            let merged = kernels.entry(file_path).or_default();
+            for kernel in file_kernels.into_vec() {
+                match merged.iter().find(|cached| cached.name == kernel.name) {
+                    Some(cached) if cached != &kernel => mismatches
+                        .push(format!("kernel metadata mismatch at {path}:\nfirst:  {cached:?}\nsecond: {kernel:?}")),
+                    Some(_) => {},
+                    None => merged.push(kernel),
                 }
-            } else {
-                kernels.insert(file_path, file_kernels);
             }
         }
     }

@@ -134,6 +134,24 @@ jobs:
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: git diff --exit-code
 
+  vulkan:
+    name: vulkan
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-nix
+      - name: Use lavapipe
+        run: |
+          mesa=$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#mesa)
+          drivers=("$mesa"/share/vulkan/icd.d/lvp_icd*.json)
+          test "${#drivers[@]}" -eq 1 && test -f "${drivers[0]}"
+          echo "VK_DRIVER_FILES=${drivers[0]}" >> "$GITHUB_ENV"
+      - name: Lint Vulkan
+        run: cargo +nightly clippy -p uzu-engine --no-default-features --features cpu,vulkan --lib --tests --locked -- -D warnings
+      - name: Test CPU and Vulkan contracts
+        run: cargo +nightly test -p uzu-engine --no-default-features --features cpu,vulkan --lib --locked
+
   validate-bindings:
     name: validate-bindings
     runs-on: prefect-github-actions
@@ -284,13 +302,14 @@ jobs:
     name: completed
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    needs: [linters, tests, validate-bindings, linters-mirai-gui, tests-mirai-gui, build-mirai-gui, build-uzu-pi-extension]
+    needs: [linters, tests, vulkan, validate-bindings, linters-mirai-gui, tests-mirai-gui, build-mirai-gui, build-uzu-pi-extension]
     if: ${{ always() }}
 
     steps:
       - run: |
           [ "${{ needs.linters.result }}" = success ]
           [ "${{ needs.tests.result }}" = success ]
+          [ "${{ needs.vulkan.result }}" = success ]
           [ "${{ needs.validate-bindings.result }}" = success ]
           [ "${{ needs.linters-mirai-gui.result }}" = success ]
           [ "${{ needs.tests-mirai-gui.result }}" = success ]
