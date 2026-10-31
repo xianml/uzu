@@ -4767,6 +4767,7 @@ name = "mirai-gui"
 version = "0.6.15"
 dependencies = [
  "chrono",
+ "dirs",
  "futures",
  "hanashi",
  "plist",
